@@ -593,10 +593,13 @@ typedef NS_ENUM(NSUInteger, LogLevel) {
         advertisementData:(NSDictionary<NSString *, id> *)advertisementData
                      RSSI:(NSNumber *)RSSI
 {
-    [self.scannedPeripherals setObject:peripheral forKey:[[peripheral identifier] UUIDString]];
+    // fix velotric bug
+    NSData *manufData = advertisementData[CBAdvertisementDataManufacturerDataKey];
     if(manufData == NULL && [peripheral.name containsString:@"velotric"]) {
       return;
     }
+    [self.scannedPeripherals setObject:peripheral forKey:[[peripheral identifier] UUIDString]];
+    
     ProtosScanResult *result = [self toScanResultProto:peripheral advertisementData:advertisementData RSSI:RSSI];
     
     [_channel invokeMethod:@"ScanResult" arguments:[self toFlutterData:result]];
